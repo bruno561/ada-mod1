@@ -1,15 +1,64 @@
-version: "3.7"
+version: '3.8'
 
 services:
-  minio:
-    image: quay.io/minio/minio
-    container_name: minio
-    environment:
-      MINIO_ROOT_USER: ROOTNAME
-      MINIO_ROOT_PASSWORD: CHANGEME123
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
     volumes:
-      - ./data:/data
+      - rabbitmq_data:/var/lib/rabbitmq
+
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+  minio:
+    image: minio/minio
     ports:
       - "9000:9000"
-      - "3000:3000"
-    command: server /data --console-address ":3000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: xxx
+      MINIO_ROOT_PASSWORD: xxx
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio_data:/data
+
+  transaction-producer:
+    build: .
+    command: python transaction-producer.py
+    volumes:
+      - .:/app
+    depends_on:
+      - rabbitmq
+      - redis
+      - minio
+    environment:
+      MINIO_ACCESS_KEY: xxx
+      MINIO_SECRET_KEY: xxx
+      REDIS_HOST: redis
+      RABBITMQ_HOST: rabbitmq
+
+  report-consumer:
+    build: .
+    command: python report-consumer.py # Substitua report-consumer.py pelo nome correto do segundo script
+    volumes:
+      - .:/app
+    depends_on:
+      - rabbitmq
+      - redis
+      - minio
+    environment:
+      MINIO_ACCESS_KEY: xxx
+      MINIO_SECRET_KEY: xxx
+      REDIS_HOST: redis
+      RABBITMQ_HOST: rabbitmq
+
+volumes:
+  rabbitmq_data:
+  redis_data:
+  minio_data:
