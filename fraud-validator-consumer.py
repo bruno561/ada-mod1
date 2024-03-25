@@ -7,8 +7,8 @@ from minio import Minio
 from minio.error import S3Error
 
 # Configurações
-MINIO_ACCESS_KEY = "UHUVRLxqMUV2BUuD9ywB"
-MINIO_SECRET_KEY = "F4M8xU71sdj2JmkCZXTap9Tzrktm9WYwJRvTofqD"
+MINIO_ACCESS_KEY = {{secret.MINIO_ACCESS_KEY}}
+MINIO_SECRET_KEY = {{secret.MINIO_SECRET_KEY}}
 MINIO_BUCKET = "relatorio"
 REDIS_HOST = 'localhost'
 REDIS_PORT = 6379
